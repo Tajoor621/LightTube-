@@ -5,7 +5,6 @@
     <application
         android:name="androidx.multidex.MultiDexApplication"
         android:allowBackup="false"
-        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_lighttube_launcher"
         android:roundIcon="@mipmap/ic_lighttube_launcher_round"
