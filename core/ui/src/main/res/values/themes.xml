@@ -1,0 +1,19 @@
+<resources>
+    <style name="Theme.LightTube" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">#006B57</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="android:windowBackground">?attr/colorSurface</item>
+    </style>
+    <style name="Theme.LightTube.Light.NoTitleBar" parent="Theme.Material3.Light.NoActionBar" />
+    <style name="Theme.LightTube.NoActionBar.Fullscreen" parent="Theme.LightTube">
+        <item name="android:windowFullscreen">true</item>
+    </style>
+    <style name="Theme.LightTube.Translucent.NoTitleBar" parent="Theme.LightTube">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+    <style name="Theme.LightTube.Translucent.NoActionBar.Fullscreen" parent="Theme.LightTube.Translucent.NoTitleBar">
+        <item name="android:windowFullscreen">true</item>
+    </style>
+    <style name="Theme.LightTube.WithActionBar" parent="Theme.Material3.DayNight" />
+</resources>

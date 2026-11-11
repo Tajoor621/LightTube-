@@ -1,0 +1,9 @@
+# Android platform and security decisions
+
+- The application requests internet, network-state and notification permissions. The playback module declares the media playback foreground service permissions. Android’s document picker grants access to files and folders chosen by the user. Downloads go into app-specific storage.
+- The network security config trusts system certificates and disables cleartext in LightTube’s own networking stack. Custom Tabs use the selected browser, which applies its own policies. Users confirm playback or download before an incoming URL is opened.
+- The launcher alias and share/link router are exported. Playback and vault components are internal. The app does not expose a download provider or accept file paths from other apps.
+- Vault imports use AES-GCM with an Android Keystore key. The credential prompt gates the vault UI. A preview is decrypted into an app-private temporary cache file after authentication and verified before playback. Closing the preview or leaving the vault clears the file. The next vault open clears leftovers from abrupt termination. Android backup is disabled. Original media remains at its source.
+- Android 14 limits process termination to the caller’s own app. LightTube reports battery and memory state and opens Android settings for Battery Saver. [Android 14 behaviour changes](https://developer.android.com/about/versions/14/behavior-changes-all#killbackgroundprocesses).
+- Play-distributed builds must use Google Play’s supported update path. An independent distribution would need a verified release feed, APK signature verification and Android’s user-confirmed installer. [Google Play permission policy](https://support.google.com/googleplay/android-developer/answer/16558241).
+- The supplied prose was used as the implementation source. Exact intent-filter and manifest parity require the original manifest bytes or a decoded XML export.

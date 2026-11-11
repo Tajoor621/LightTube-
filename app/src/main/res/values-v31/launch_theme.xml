@@ -1,0 +1,6 @@
+<resources>
+    <style name="Theme.LightTube.Launch" parent="Theme.LightTube">
+        <item name="android:windowSplashScreenBackground">@color/lighttube_brand_ink</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_lighttube_mark</item>
+    </style>
+</resources>

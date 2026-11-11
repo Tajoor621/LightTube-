@@ -1,0 +1,7 @@
+<resources>
+    <style name="Theme.LightTube" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">#83E7C4</item>
+        <item name="colorOnPrimary">#00382C</item>
+        <item name="android:windowBackground">?attr/colorSurface</item>
+    </style>
+</resources>

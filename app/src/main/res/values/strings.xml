@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">LightTube</string>
+    <string name="home_title">Media tools</string>
+    <string name="home_description">Open a link, play a file or manage your media.</string>
+    <string name="app_version">Version %1$s</string>
+</resources>

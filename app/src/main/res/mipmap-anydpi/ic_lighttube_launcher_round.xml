@@ -1,0 +1,11 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:fillColor="@color/lighttube_brand_ink"
+        android:pathData="M54,2 A52,52 0,1 0,54 106 A52,52 0,1 0,54 2 Z" />
+    <group android:pivotX="54" android:pivotY="54" android:scaleX="1.16" android:scaleY="1.16" android:translateY="-2">
+        <path android:fillColor="@color/lighttube_brand_mint" android:pathData="@string/lighttube_mark_path" />
+    </group>
+</vector>
