@@ -12,6 +12,7 @@ android {
         targetSdk = 35
         versionCode = 10000
         versionName = "1.0.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
         vectorDrawables.useSupportLibrary = true
     }
@@ -68,6 +69,10 @@ android {
 kotlin { jvmToolchain(17) }
 
 dependencies {
+    androidTestImplementation(libs.test.runner)
+    androidTestImplementation(libs.test.junit)
+    androidTestImplementation(libs.test.core)
+    androidTestImplementation(libs.media3.session)
     implementation(libs.core)
     implementation(libs.appcompat)
     implementation(libs.activity)

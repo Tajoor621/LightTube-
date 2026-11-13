@@ -1,6 +1,6 @@
 # Features and acceptance status
 
-“Implemented in source” describes code present in this package. The Android build and device checks remain pending.
+“Implemented in source” describes code present in this repository. See the GitHub Actions run for build and emulator results.
 
 | Area | Implemented in source | Remaining |
 |---|---|---|
@@ -11,7 +11,7 @@
 | Vault | Android 6+, device credential gate, encrypted photo/video copies, name search, preview and deletion. Imports are limited to 32 MB per file | Vault-specific PIN or biometric prompt, export, moves, drag/drop, and bulk management |
 | Cleaner | User-selected folder, exact duplicate photo matching and confirmed deletion. The scan checks up to 400 photos, each at most 50 MB | APK, empty folder and cache scans, plus similar-photo detection |
 | Battery and memory | Device metrics, battery saver status and a shortcut to Android battery settings | Third-party process killing, booster widget and foreground app detection |
-| WhatsApp statuses | List media from a folder granted through the system picker, export through the system file dialog or copy to the vault | Devices whose picker hides the status directory require a copy or user-visible folder. Integrated gallery and auto-discovery are pending |
+| WhatsApp statuses | List media from a granted folder or select saved image and video files individually. Export through the system file dialog or copy to the vault. | Devices whose picker hides the status directory require a user-visible copy. Integrated gallery and auto-discovery are pending |
 | Search | Download name search and vault name search | Unified online search, voice and Process Text |
 | Browser | Android Custom Tabs and local bookmarks | Persistent multi-tab WebView, speed dial customisation and TTS |
 | Settings | System/light/dark appearance, version and notification permission | Language, account, policy screens, AMOLED and accent settings |
@@ -23,7 +23,7 @@ Source folders with an empty manifest reserve the requested module boundary. The
 
 ## Device verification checklist
 
-- Launch the dev APK on API 21 and 35. Check navigation, large text and light/dark appearance.
+- Launch the dev APK on API 21 and recent physical Android devices. Check navigation, large text and light/dark appearance.
 - Share HTTPS page and media links. Try a direct file, a bad address, a cancelled transfer and a failed transfer followed by retry.
 - Pick and play local audio and video. Background the player, open notification controls and enter PiP on a compatible device. Test HTTPS HLS and DASH manifests.
 - Grant a test status folder, export media, then revoke access and retry. Confirm the UI recovers.

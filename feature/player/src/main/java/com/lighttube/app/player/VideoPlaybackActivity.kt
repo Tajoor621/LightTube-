@@ -40,7 +40,8 @@ class VideoPlaybackActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        pendingUri = if (savedInstanceState == null) intent.data else null
+        pendingUri = if (savedInstanceState == null) intent.data
+            else savedInstanceState.getString("pendingMedia")?.let(Uri::parse)
         playerView = PlayerView(this).apply { setShowSubtitleButton(true) }
         pip = Button(this).apply {
             text = "Picture in picture"
@@ -59,6 +60,11 @@ class VideoPlaybackActivity : AppCompatActivity() {
             windowInsets
         }
         setContentView(root)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("pendingMedia", pendingUri?.toString())
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -123,7 +129,9 @@ class VideoPlaybackActivity : AppCompatActivity() {
 
     companion object {
         fun open(context: Context, uri: Uri) {
-            context.startActivity(Intent(context, VideoPlaybackActivity::class.java).setData(uri))
+            val intent = Intent(context, VideoPlaybackActivity::class.java).setData(uri)
+            if (uri.scheme == "content") intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            context.startActivity(intent)
         }
     }
 }

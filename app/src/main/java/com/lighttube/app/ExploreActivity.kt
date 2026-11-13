@@ -42,6 +42,8 @@ class ExploreActivity : AppCompatActivity() {
     private val worker = Executors.newSingleThreadExecutor()
     private val prefs by lazy { getSharedPreferences("appearance", MODE_PRIVATE) }
     private var exportUri: Uri? = null
+    private var screenLink: Uri? = null
+    private var showingSharedMedia = false
     private var scanGeneration = 0
     private var queueFilter = ""
     private var showQueue = false
@@ -54,6 +56,17 @@ class ExploreActivity : AppCompatActivity() {
     }
     private val statusPicker = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
         if (uri != null) openStatuses(uri)
+    }
+    private val statusFilesPicker = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
+        if (uris.isNotEmpty()) {
+            statuses()
+            uris.take(30).forEach { uri ->
+                val mime = runCatching { contentResolver.getType(uri) }.getOrNull().orEmpty()
+                if (mime.startsWith("image/") || mime.startsWith("video/")) {
+                    showStatus(StatusFolder.Item(Documents.name(contentResolver, uri), uri, mime))
+                }
+            }
+        }
     }
     private val cleanerPicker = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
         if (uri != null) scanDuplicates(uri)
@@ -92,17 +105,28 @@ class ExploreActivity : AppCompatActivity() {
         backCallback = callback
         onBackPressedDispatcher.addCallback(this, callback)
         exportUri = savedInstanceState?.getString("exportUri")?.let(Uri::parse)
-        home()
-        if (savedInstanceState == null) handleIncoming(intent)
+        when {
+            savedInstanceState == null -> { home(); handleIncoming(intent) }
+            savedInstanceState.getBoolean("downloadsVisible") -> queue(savedInstanceState.getString("queueFilter").orEmpty())
+            savedInstanceState.getString("screenLink") != null ->
+                savedInstanceState.getString("screenLink")?.let(MediaLinks::https)?.let(::showLink) ?: home()
+            savedInstanceState.getBoolean("sharedMediaVisible") -> { home(); handleIncoming(intent) }
+            else -> home()
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putString("exportUri", exportUri?.toString())
+        outState.putString("screenLink", screenLink?.toString())
+        outState.putBoolean("sharedMediaVisible", showingSharedMedia)
+        outState.putBoolean("downloadsVisible", showQueue)
+        outState.putString("queueFilter", queueFilter)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        setIntent(intent)
         handleIncoming(intent)
     }
 
@@ -112,6 +136,7 @@ class ExploreActivity : AppCompatActivity() {
         val sources = (0 until minOf(clips.itemCount, 30)).mapNotNull { clips.getItemAt(it).uri }
         if (sources.isEmpty()) return
         screen("Shared media")
+        showingSharedMedia = true
         sources.forEach { uri ->
             val mime = runCatching { contentResolver.getType(uri) }.getOrNull().orEmpty()
             val name = Documents.name(contentResolver, uri)
@@ -141,7 +166,7 @@ class ExploreActivity : AppCompatActivity() {
         }
         heading("Your media")
         button("Downloads") { queue("") }
-        button("Play a local file") { filePicker.launch(arrayOf("audio/*", "video/*")) }
+        button("Play a local file") { attempt { filePicker.launch(arrayOf("audio/*", "video/*")) } }
         button("Private vault") { VaultActivity.launch(this, emptyList()) }
         heading("Utilities")
         button("WhatsApp statuses") { statuses() }
@@ -158,6 +183,7 @@ class ExploreActivity : AppCompatActivity() {
 
     private fun showLink(uri: Uri) {
         screen("Open link")
+        screenLink = uri
         paragraph(uri.toString())
         val mime = MediaLinks.mime(uri)
         if (mime != null) {
@@ -255,8 +281,9 @@ class ExploreActivity : AppCompatActivity() {
 
     private fun statuses() {
         screen("WhatsApp statuses")
-        paragraph("Choose .Statuses or the WhatsApp Media folder if your file picker makes it available.")
-        button("Choose folder") { statusPicker.launch(null) }
+        paragraph("Choose .Statuses or the WhatsApp Media folder. If your device hides .Statuses, you can pick a saved image or video directly.")
+        button("Choose folder") { attempt { statusPicker.launch(null) } }
+        button("Choose saved status files") { attempt { statusFilesPicker.launch(arrayOf("image/*", "video/*")) } }
     }
 
     private fun openStatuses(tree: Uri) {
@@ -265,15 +292,17 @@ class ExploreActivity : AppCompatActivity() {
         runWork({ StatusFolder.list(this, tree) }) { items ->
             if (generation != scanGeneration) return@runWork
             if (items.isEmpty()) paragraph("No images or videos are available in this folder.")
-            items.forEach { item ->
-                button(item.name) {
-                    MaterialAlertDialogBuilder(this).setTitle(item.name)
-                        .setItems(arrayOf("Save a copy", "Copy to vault")) { _, which ->
-                            if (which == 0) export(item.uri, item.name, item.mime)
-                            else VaultActivity.launch(this, listOf(item.uri))
-                        }.show()
-                }
-            }
+            items.forEach(::showStatus)
+        }
+    }
+
+    private fun showStatus(item: StatusFolder.Item) {
+        button(item.name) {
+            MaterialAlertDialogBuilder(this).setTitle(item.name)
+                .setItems(arrayOf("Save a copy", "Copy to vault")) { _, which ->
+                    if (which == 0) export(item.uri, item.name, item.mime)
+                    else VaultActivity.launch(this, listOf(item.uri))
+                }.show()
         }
     }
 
@@ -288,7 +317,7 @@ class ExploreActivity : AppCompatActivity() {
     private fun cleaner() {
         screen("Photo cleaner")
         paragraph("Scan one folder for byte-identical photos. You choose which copies to delete.")
-        button("Choose folder to scan") { cleanerPicker.launch(null) }
+        button("Choose folder to scan") { attempt { cleanerPicker.launch(null) } }
     }
 
     private fun scanDuplicates(tree: Uri) {
@@ -362,6 +391,8 @@ class ExploreActivity : AppCompatActivity() {
     private fun screen(title: String, isHome: Boolean = false) {
         scanGeneration++
         showQueue = false
+        screenLink = null
+        showingSharedMedia = false
         binding.content.removeAllViews()
         binding.root.scrollTo(0, 0)
         backCallback?.isEnabled = !isHome

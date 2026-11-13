@@ -15,7 +15,7 @@ class DeepLinkActivity : Activity() {
         val forwarded = Intent(this, ExploreActivity::class.java)
         val incoming = intent
         val link = runCatching { when (incoming.action) {
-            Intent.ACTION_SEND -> incoming.getStringExtra(Intent.EXTRA_TEXT)?.let(MediaLinks::fromText)
+            Intent.ACTION_SEND -> incoming.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()?.let(MediaLinks::fromText)
             Intent.ACTION_VIEW -> incoming.data?.takeIf {
                 it.scheme == "lighttube" && it.host == "open" && it.path.isNullOrEmpty()
             }?.getQueryParameter("url")?.let(MediaLinks::https)
@@ -24,12 +24,22 @@ class DeepLinkActivity : Activity() {
         if (link != null) {
             forwarded.data = link
         } else {
-            val uris = runCatching { when (incoming.action) {
-                Intent.ACTION_SEND -> listOfNotNull(IntentCompat.getParcelableExtra(incoming, Intent.EXTRA_STREAM, Uri::class.java))
-                Intent.ACTION_SEND_MULTIPLE -> IntentCompat.getParcelableArrayListExtra(incoming, Intent.EXTRA_STREAM, Uri::class.java).orEmpty()
-                else -> emptyList()
-            } }.getOrDefault(emptyList()).asSequence()
-                .filter { it.scheme == "content" }.distinct().take(30).toList()
+            val uris = runCatching {
+                if (incoming.action != Intent.ACTION_SEND && incoming.action != Intent.ACTION_SEND_MULTIPLE) {
+                    emptyList()
+                } else {
+                    val streams = if (incoming.action == Intent.ACTION_SEND) {
+                        listOfNotNull(IntentCompat.getParcelableExtra(incoming, Intent.EXTRA_STREAM, Uri::class.java))
+                    } else {
+                        IntentCompat.getParcelableArrayListExtra(incoming, Intent.EXTRA_STREAM, Uri::class.java).orEmpty()
+                    }
+                    val clip = incoming.clipData
+                    val clipUris = (0 until minOf(clip?.itemCount ?: 0, 30)).mapNotNull { clip?.getItemAt(it)?.uri }
+                    (streams.asSequence() + clipUris.asSequence())
+                        .filter { it.scheme == "content" && !it.authority.isNullOrEmpty() }
+                        .distinct().take(30).toList()
+                }
+            }.getOrDefault(emptyList())
             if (uris.isEmpty()) {
                 Toast.makeText(this, "Share an HTTPS link or a media file.", Toast.LENGTH_SHORT).show()
                 finish()

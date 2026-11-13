@@ -44,7 +44,7 @@ AndroidX dependencies contribute their own manifest entries during merging. Open
 
 ## Verification
 
-The source package passed XML and TOML parsing, checks for module and component declarations, and archive integrity checks. Gradle could not bootstrap in the source environment because `services.gradle.org` could not be resolved. Android compilation, lint, APK installation and device behaviour are pending.
+The [Verify LightTube workflow](https://github.com/Tajoor621/LightTube-/actions/workflows/android.yml) checks the Android build and lint, publishes a signed debug APK, and runs device tests on Android 15, 16 and 17 emulator images. The tests cover launcher navigation, configuration recreation, direct-link routing and local audio playback. Physical devices, OEM-specific behaviour and additional features still require manual verification.
 
 - [Features and acceptance status](docs/FEATURES.md)
 - [Link routing](docs/DEEPLINKS.md)

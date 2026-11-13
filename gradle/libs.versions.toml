@@ -24,6 +24,10 @@ media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3" }
 browser = { module = "androidx.browser:browser", version.ref = "browser" }
 multidex = { module = "androidx.multidex:multidex", version.ref = "multidex" }
 
+test-runner = { module = "androidx.test:runner", version = "1.6.2" }
+test-junit = { module = "androidx.test.ext:junit", version = "1.2.1" }
+test-core = { module = "androidx.test:core", version = "1.6.1" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
